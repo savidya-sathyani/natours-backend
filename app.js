@@ -1,4 +1,3 @@
-const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
 const userRouter = require('./routes/userRouter');
@@ -8,7 +7,10 @@ const app = express();
 
 // Middleware
 // The order that we defines middleware is matters.
-app.use(morgan('dev')); // Logger
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); // Logger
+}
+app.use(express.static(`${__dirname}/public`));
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next(); // next() is a must code otherwise the request will get stuck in the middle

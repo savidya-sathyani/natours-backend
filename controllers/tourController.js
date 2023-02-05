@@ -25,6 +25,29 @@ exports.validateId = (req, res, next, val) => {
   next();
 };
 
+exports.validateBody = (req, res, next) => {
+  const payload = req.body;
+  if (!payload) {
+    return res.status(400).json({
+      status: STATUS.ERROR,
+      message: 'Invalid Request!!',
+    });
+  }
+
+  const requiredProperties = ['name', 'price'];
+  const keyArray = Object.keys(payload);
+  const isValid = requiredProperties.every((item) => keyArray.includes(item));
+
+  if (!isValid) {
+    return res.status(400).json({
+      status: STATUS.ERROR,
+      message: 'Invalid Request!!',
+    });
+  }
+
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   logTime(req);
   const data = {
