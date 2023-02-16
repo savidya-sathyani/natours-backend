@@ -3,12 +3,6 @@ const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 
-const STATUS = {
-  SUCCESS: 'success',
-  FAIL: 'fail',
-  ERROR: 'error',
-};
-
 exports.bestTours = (req, res, next) => {
   req.query = {
     ...req.query,
@@ -27,7 +21,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   const allTours = await featuresAdded.query;
 
   res.status(200).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     results: allTours.length,
     data: {
       tours: allTours,
@@ -39,11 +33,11 @@ exports.getTourById = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
 
   if (!tour) {
-    return next(new AppError('No tour found with this ID', 404));
+    return next(new AppError('No tour found with this ID.', 404));
   }
 
   res.status(200).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     data: {
       tour: tour,
     },
@@ -54,7 +48,7 @@ exports.addTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
   if (newTour) {
     res.status(201).json({
-      status: STATUS.SUCCESS,
+      status: 'success',
       data: {
         tour: newTour,
       },
@@ -69,11 +63,11 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   });
 
   if (!updatedTour) {
-    return next(new AppError('No tour found with this ID', 404));
+    return next(new AppError('No tour found with this ID.', 404));
   }
 
   res.status(200).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     data: {
       tour: updatedTour,
     },
@@ -84,11 +78,11 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
 
   if (!tour) {
-    return next(new AppError('No tour found with this ID', 404));
+    return next(new AppError('No tour found with this ID.', 404));
   }
 
   res.status(204).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     data: null,
   });
 });
@@ -115,7 +109,7 @@ exports.getToursStats = catchAsync(async (req, res, next) => {
     },
   ]);
   res.status(200).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     data: {
       stats,
     },
@@ -160,7 +154,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     },
   ]);
   res.status(200).json({
-    status: STATUS.SUCCESS,
+    status: 'success',
     data: {
       plan,
     },

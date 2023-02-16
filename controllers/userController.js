@@ -1,54 +1,50 @@
-const fs = require('fs');
+const User = require('../models/userModel');
+const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
-const STATUS = {
-  SUCCESS: 'success',
-  FAIL: 'fail',
-  ERROR: 'error',
-};
-
-const logTime = (req) => {
-  console.log(`LOGGER:: Request time:${req.requestTime}`);
-};
-
-const allUserFile = `${__dirname}/../dev-data/data/users.json`;
-const allUsers = JSON.parse(fs.readFileSync(allUserFile));
-
-exports.getAllUsers = (req, res) => {
-  console.log(`LOGGER:: Request time:${req.requestTime}`);
-  const data = {
-    status: STATUS.SUCCESS,
-    results: allUsers.length,
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const featuresAdded = new APIFeatures(User.find(), req.query).filterFields();
+  const users = await featuresAdded.query;
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
     data: {
-      users: allUsers,
+      users,
     },
-  };
-  res.status(200).json(data);
-};
+  });
+});
 
 exports.addUser = (req, res) => {
   res.status(500).json({
-    status: STATUS.ERROR,
+    status: 'error',
     message: 'Something went wrong!!',
   });
 };
 
 exports.getUserById = (req, res) => {
   res.status(500).json({
-    status: STATUS.ERROR,
+    status: 'error',
     message: 'Something went wrong!!',
   });
 };
 
 exports.updateUser = (req, res) => {
   res.status(500).json({
-    status: STATUS.ERROR,
+    status: 'error',
     message: 'Something went wrong!!',
   });
 };
 
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: STATUS.ERROR,
-    message: 'Something went wrong!!',
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+
+  if (!user) {
+    return next(new AppError('No user found with this ID.', 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
-};
+});
