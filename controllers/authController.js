@@ -53,7 +53,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // Check if the token is valid
   if (!token)
     return next(
-      new AppError('Permission Denied. Please login to get access.', 401)
+      new AppError('Token Invalid. Please login again to get access.', 401)
     );
 
   const decoded = await validateToken(token);
@@ -76,3 +76,10 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = user;
   next();
 });
+
+exports.restrictTo = (...roles) =>
+  catchAsync(async (req, res, next) => {
+    if (!roles.includes(req.user.role))
+      return next(new AppError('Permission Denied!', 403));
+    next();
+  });
