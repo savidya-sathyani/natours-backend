@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { getHashed, getRandomToken } = require('../utils/cryptoHash');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -46,6 +47,8 @@ const userSchema = new mongoose.Schema({
     type: Date,
     select: false,
   },
+  passwordResetToken: String,
+  passwordResetTokenExpire: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -53,6 +56,15 @@ userSchema.pre('save', async function (next) {
 
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirmed = undefined;
+
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // Subtract 1 second in case the token creation got delayed a bit
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
@@ -73,8 +85,15 @@ userSchema.methods.isPasswordChangedAfterLogin = async function (JWTTimeStamp) {
     return JWTTimeStamp < convertedPasswordChangedTime;
   }
 
-  // Not changed
+  // return false when Not changed
   return false;
+};
+
+userSchema.methods.getPasswordResetToken = function () {
+  const resetToken = getRandomToken(32);
+  this.passwordResetToken = getHashed(resetToken);
+  this.passwordResetTokenExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
